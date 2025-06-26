@@ -1,70 +1,24 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 #include "DHT.h"
 #include "string.h"
 #include "stdio.h"
-/* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
 
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
 
 UART_HandleTypeDef huart1;
 
-/* USER CODE BEGIN PV */
 DHT_data data;
 DHT_sensor sensor;
 uint16_t data_ir;
 char buffer[100];
 uint32_t lastSendTime = 0;
-/* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC_Init(void);
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
 uint16_t readIR(){
 	HAL_ADC_Start(&hadc);
 	HAL_ADC_PollForConversion(&hadc, HAL_MAX_DELAY);
@@ -72,71 +26,35 @@ uint16_t readIR(){
 }
 
 void sendUART(){
-	sprintf(buffer, "{\"temp\":%.2f,\"hum\":%.2f,\"ir\":%.2f}\r\n",data.temp, data.hum, (float)data_ir);
+	sprintf(buffer, "{\"temp\":%.2f,\"hum\":%.2f,\"ir\":%.2f}\r\n",data.temp, data.hum, (float)data_ir); //JSON format
 	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 }
-/* USER CODE END 0 */
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_ADC_Init();
-  /* USER CODE BEGIN 2 */
+  
   sensor.DHT_Port = GPIOA;
   sensor.DHT_Pin = GPIO_PIN_0;
   sensor.type = DHT11;
   sensor.pullUp = GPIO_NOPULL;
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+ 
   while (1)
   {
-    /* USER CODE END WHILE */
+	data = DHT_getData(&sensor); // read DHT11
+	data_ir = readIR(); 
 
-    /* USER CODE BEGIN 3 */
-	  data = DHT_getData(&sensor);
-	  data_ir = readIR();
-
-	  if (HAL_GetTick() - lastSendTime >= 2000) {
+	if (HAL_GetTick() - lastSendTime >= 2000) {
 	      sendUART();
 	      lastSendTime = HAL_GetTick();
-	  }
+ 	}
   }
-  /* USER CODE END 3 */
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
