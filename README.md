@@ -19,6 +19,8 @@ In this project, embedded systems and IoT architecture are integrated to collect
 -> ESP32 Side
 
 * UART data received from the STM32 is parsed (JSON parsing)
+  
+* The ESP32 was programmed using Arduino IDE and the Arduino framework
 
 * The data is sent to ThingSpeak via HTTP POST over Wi-Fi
   
