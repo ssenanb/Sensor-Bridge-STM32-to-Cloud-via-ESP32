@@ -14,7 +14,13 @@ In this project, embedded systems and IoT architecture are integrated to collect
 * The data is processed and converted to JSON format
 
 * The JSON data is transmitted to the ESP32 via UART
-  
+
+-> Software Flow (STM32)
+
+- Read IR sensor value via ADC1
+- Poll DHT11 every 2 seconds (GPIO control + delay)
+- Create a JSON object using sprintf (e.g., {"distance": XX.XX, "temperature": XX, "humidity": XX})
+- Send data over UART to ESP32
   
 -> ESP32 Side
 
@@ -23,6 +29,13 @@ In this project, embedded systems and IoT architecture are integrated to collect
 * The ESP32 was programmed using Arduino IDE and the Arduino framework
 
 * The data is sent to ThingSpeak via HTTP POST over Wi-Fi
+
+-> Software Flow (ESP32)
+
+- Wait for incoming UART line ending with `\n`
+- Parse JSON using ArduinoJson
+- Format an HTTP POST body with API key and field values
+- Send HTTP POST to ThingSpeak every 2 seconds
   
 -> ThingSpeak Platform
 
@@ -32,7 +45,7 @@ In this project, embedded systems and IoT architecture are integrated to collect
 
 * Connection is authorized using an API key
 
-# Compenents Used
+# Components Used
 
 STM32FODISC
 
